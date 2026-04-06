@@ -11,6 +11,7 @@ public class Main {
 
         N = Integer.parseInt(br.readLine());
         int[] height = new int[1001];
+        int minL = 1001, maxL = 0;
 
         for (int i = 1; i <= N; i++) {
             StringTokenizer st = new StringTokenizer(br.readLine());
@@ -18,20 +19,26 @@ public class Main {
             int H = Integer.parseInt(st.nextToken());   // 높이
 
             height[L] = H;
+            minL = Math.min(minL, L);
+            maxL = Math.max(maxL, L);
         }
 
         int[] left = new int[1001];
-        for (int i = 1; i <= 1000; i++) {
-            left[i] = Math.max(left[i - 1], height[i]);
+        int currentLeftMax = 0;
+        for (int i = minL; i <= maxL; i++) {
+            currentLeftMax = Math.max(currentLeftMax, height[i]);
+            left[i] = currentLeftMax;
         }
 
         int[] right = new int[1001];
-        for (int i = 999; i >= 0; i--) {
-            right[i] = Math.max(right[i + 1], height[i]);
+        int currentRightMax = 0;
+        for (int i = maxL; i >= minL; i--) {
+            currentRightMax = Math.max(currentRightMax, height[i]);
+            right[i] = currentRightMax;
         }
 
         int ans = 0;
-        for (int i = 0; i <= 1000; i++) {
+        for (int i = minL; i <= maxL; i++) {
             ans += Math.min(left[i], right[i]);
         }
 
