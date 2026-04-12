@@ -39,7 +39,6 @@ public class Main {
         Q = Integer.parseInt(st.nextToken());
         // 각 실험 결과 기록
         for (int i = 1; i <= Q; i++) {
-            // System.out.println("i: " + i);
             st = new StringTokenizer(br.readLine());
             int r1 = Integer.parseInt(st.nextToken());
             int c1 = Integer.parseInt(st.nextToken());
@@ -59,8 +58,8 @@ public class Main {
         List<int[]> points = new ArrayList<>();
         Set<Integer> affected = new HashSet<>();
 
-        for (int r = x1; r < x2; r++) { // [수정]
-            for (int c = y1; c < y2; c++) { // [수정]
+        for (int r = x1; r < x2; r++) {
+            for (int c = y1; c < y2; c++) {
                 if (board[r][c] > 0) {
                     affected.add(board[r][c]);
                 }
@@ -78,8 +77,8 @@ public class Main {
     }
 
     private static boolean isSplited(int origin) {
-        int startX = -1; // [수정]
-        int startY = -1; // [수정]
+        int startX = -1;
+        int startY = -1;
 
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
@@ -90,12 +89,13 @@ public class Main {
             }
         }
 
-        if (startX == -1) return false; // [수정]
+        if (startX == -1) return false;
 
         Queue<int[]> queue = new LinkedList<>();
         queue.add(new int[]{startX, startY});
 
         boolean[][] visited = new boolean[N][N];
+
         while (!queue.isEmpty()) {
             int[] curr = queue.poll();
             int x = curr[0];
@@ -144,6 +144,7 @@ public class Main {
                 if (board[i][j] == num) board[i][j] = 0;
             }
         }
+
         groups.removeIf(g -> g.time == num);
     }
 
@@ -183,7 +184,6 @@ public class Main {
             if (o1[0] != o2[0]) return o1[0] - o2[0];
             return o1[1] - o2[1];
         });
-        //System.out.println(points.size());
 
         int minX = points.get(0)[0];
         int minY = points.get(0)[1];
@@ -249,8 +249,6 @@ public class Main {
             }
         }
 
-        // printBoard();
-
         int sum = 0;
         for (int i = 1; i <= Q; i++) {
             for (int j = i + 1; j <= Q; j++) {
@@ -261,20 +259,11 @@ public class Main {
                         if (g.time == j) sizeJ = g.size;
                     }
                     sum += sizeI * sizeJ;
-//                    System.out.println(sizeI + " * " + sizeJ + " : " + sizeI * sizeJ);
-//                    System.out.println("cal: " + sum);
                 }
             }
         }
         System.out.println(sum);
     }
 
-    private static void printBoard() {
-        for (int i = 0; i < N; i++) {
-            for (int j = 0; j < N; j++) {
-                System.out.print(board[i][j] + " ");
-            }
-            System.out.println();
-        }
-    }
 }
+
