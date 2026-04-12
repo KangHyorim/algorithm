@@ -9,7 +9,7 @@ public class Main {
     static List<Box> boxes = new ArrayList<>();
     static StringBuilder sb;
 
-    static class Box {
+    static class Box implements Comparable<Box> {
         int k, h, w, c, r;
 
         Box(int k, int h, int w, int c, int r) {
@@ -18,6 +18,11 @@ public class Main {
             this.w = w;
             this.c = c;
             this.r = r;
+        }
+
+        @Override
+        public int compareTo(Box o) {
+            return this.k - o.k;
         }
     }
 
@@ -38,24 +43,20 @@ public class Main {
 
             Box b = new Box(k, h, w, c, 1);
 
-            // [수정] 1. 박스 투입 시 즉시 바닥이나 다른 박스 위까지 떨어지도록 시뮬레이션 적용
             int r = 1;
             while (true) {
                 boolean canFall = true;
                 for (int j = c; j < c + w; j++) {
-                    int nextRow = r + h;
-                    if (nextRow > N || board[nextRow][j] != 0) {
+                    int maxRow = r + h;
+                    if (maxRow > N || board[maxRow][j] != 0) {
                         canFall = false;
                         break;
                     }
                 }
-                if (canFall) {
-                    r++;
-                } else {
-                    break;
-                }
+                if (canFall) r++;
+                else break;
             }
-            b.r = r; // 최종 낙하 위치 저장
+            b.r = r;
 
             boxes.add(b);
             putBox(b);
@@ -73,6 +74,7 @@ public class Main {
     static boolean canMoveLeft(Box b) {
         removeBox(b);
         int c = b.c;
+
         while (c > 1) {
             boolean canMove = true;
             for (int i = b.r; i < b.r + b.h; i++) {
@@ -81,11 +83,26 @@ public class Main {
                     break;
                 }
             }
+
             if (canMove) c--;
             else break;
         }
         putBox(b);
         return c == 1;
+    }
+
+    static void leaveLeft() {
+        Collections.sort(boxes);
+
+        for (Box b : boxes) {
+            if (canMoveLeft(b)) {
+                removeBox(b);
+                boxes.remove(b);
+                sb.append(b.k).append("\n");
+                break;
+            }
+        }
+        applyGravity();
     }
 
     static boolean canRemoveRight(Box b) {
@@ -106,26 +123,9 @@ public class Main {
         return c + b.w - 1 == N;
     }
 
-    static void leaveLeft() {
-        Collections.sort(boxes, (o1, o2) -> {
-            return o1.k - o2.k;
-        });
-
-        for (Box b : boxes) {
-            if (canMoveLeft(b)) {
-                removeBox(b);
-                boxes.remove(b);
-                sb.append(b.k).append("\n");
-                break;
-            }
-        }
-        applyGravity();
-    }
-
     static void leaveRight() {
-        Collections.sort(boxes, (o1, o2) -> {
-            return o1.k - o2.k;
-        });
+        Collections.sort(boxes);
+
         for (Box b : boxes) {
             if (canRemoveRight(b)) {
                 removeBox(b);
@@ -146,25 +146,18 @@ public class Main {
     }
 
     static void putBox(Box b) {
-        int k = b.k;
-        int w = b.w;
-        int h = b.h;
-        int c = b.c;
-        int r = b.r;
-
-        // [수정] i = 1 이 아니라 박스의 현재 위치인 i = r 부터 그리도록 수정 (기존의 가장 큰 버그)
-        for (int i = r; i < r + h; i++) {
-            for (int j = c; j < c + w; j++) {
-                board[i][j] = k;
+        for (int i = b.r; i < b.r + b.h; i++) {
+            for (int j = b.c; j < b.c + b.w; j++) {
+                board[i][j] = b.k;
             }
         }
     }
 
     static void applyGravity() {
         int[][] newBoard = new int[N + 1][N + 1];
-
-        // [수정] 2. r(상단)이 아니라 박스의 하단(r + h) 기준으로 내림차순 정렬하여 아래쪽 박스부터 중력 적용
-        boxes.sort((a, b) -> (b.r + b.h) - (a.r + a.h));
+        Collections.sort(boxes, (o1, o2) -> {
+            return (o2.r + o2.h) - (o1.r + o1.h);
+        });
 
         for (Box b : boxes) {
             int r = b.r;
@@ -173,21 +166,17 @@ public class Main {
             while (true) {
                 boolean canFall = true;
 
-                for (int j = c; j < c + b.w; j++) {
-                    int nextRow = r + b.h;
-                    if (nextRow > N || newBoard[nextRow][j] != 0) {
+                for (int i = c; i < c + b.w; i++) {
+                    int bottomRow = r + b.h;
+                    if (bottomRow > N || newBoard[bottomRow][i] != 0) {
                         canFall = false;
                         break;
                     }
                 }
 
-                if (canFall) {
-                    r++;
-                } else {
-                    break;
-                }
+                if (canFall) r++;
+                else break;
             }
-
             b.r = r;
 
             for (int i = r; i < r + b.h; i++) {
@@ -197,14 +186,5 @@ public class Main {
             }
         }
         board = newBoard;
-    }
-
-    static void printBoard() {
-        for (int i = 1; i <= N; i++) {
-            for (int j = 1; j <= N; j++) {
-                System.out.print(board[i][j] + " ");
-            }
-            System.out.println();
-        }
     }
 }
